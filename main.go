@@ -16,18 +16,20 @@ func check(e error) {
 }
 
 func main() {
-	// アクセストークンを使用してクライアントを生成する
 
+	// Get access token from args
 	flag.Parse()
 	tkn := flag.Arg(0)
 	api := slack.New(tkn)
-	chn_id := get_calendar_channel(api)
 
-	prm := slack.GetConversationHistoryParameters{ChannelID: chn_id}
+	chn_id := get_calendar_channel(api) // Get target channel id
+
+	// Get message list
+	prm := slack.GetConversationHistoryParameters{ChannelID: chn_id, Limit: 1000}
 	res, err := api.GetConversationHistory(&prm)
 	check(err)
 
-	delete_title := "た：みーてぃんぐ"
+	delete_title := "hogehoge" // Target title name to delete
 	var cnt int
 
 	for _, m := range res.Messages {
@@ -35,7 +37,7 @@ func main() {
 			if att.Title == delete_title {
 				_, _, err := api.DeleteMessage(chn_id, m.Timestamp)
 				check(err)
-				time.Sleep(1 * time.Second)
+				time.Sleep(1 * time.Second) // To escape the api limit
 				cnt++
 			}
 		}
@@ -46,20 +48,18 @@ func main() {
 
 func get_calendar_channel(api *slack.Client) string {
 	var result string
-	calender_name := "calendar"
-	prm := slack.GetConversationsParameters{}
+	calender_name := "calendar" // Target name of channel
 
+	prm := slack.GetConversationsParameters{}
 	channels, _, err := api.GetConversations(&prm)
 	check(err)
-	time.Sleep(1 * time.Second)
 
+	// Find channel
 	for _, c := range channels {
-
 		if strings.Contains(c.Name, calender_name) {
 			result = c.ID
 		}
 	}
 
 	return result
-
 }
