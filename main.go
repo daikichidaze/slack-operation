@@ -15,6 +15,9 @@ func check(e error) {
 	}
 }
 
+// arg 0: slack access token
+// arg 1: channel name
+// arg 2: delete message title
 func main() {
 
 	// Get access token from args
@@ -38,6 +41,10 @@ func main() {
 		for _, att := range m.Attachments {
 			if att.Title == delete_title {
 				cnt = delete_message(api, chn_id, m.Timestamp, cnt)
+
+				if cnt%25 == 0 {
+					fmt.Println(time.Now(), cnt, "messages were deleted")
+				}
 			}
 		}
 
@@ -70,7 +77,7 @@ func get_calendar_channel(api *slack.Client, channel_name string) string {
 func delete_message(api *slack.Client, chn_id string, timestamp string, cnt int) int {
 	_, _, err := api.DeleteMessage(chn_id, timestamp)
 	check(err)
-	time.Sleep(1 * time.Second) // To escape the api limit
+	time.Sleep(750 * time.Millisecond) // To escape the api limit
 	cnt++
 	return cnt
 }
